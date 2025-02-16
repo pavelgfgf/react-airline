@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router'
 
 
 const LoginModule = () => {
-    const [userName, setUserName] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate()
 
@@ -16,15 +16,15 @@ const LoginModule = () => {
         setTimeout(() => {
             navigate('/')
         }, 2000)
-        if (userName) {
+        if (phone && password) {
             toast.success('Успешно авторизовались')
         } else {
             toast.error('Ошибка')
         }
         
     }
-    const handleChangeUserName = (e) => {
-        setUserName(e.target.value)
+    const handleChangePhone = (e) => {
+        setPhone(e.target.value)
     }
 
     const handleChangePassword = (e) => {
@@ -34,7 +34,7 @@ const LoginModule = () => {
     const hadleSubmit = async (event) => {
         event.preventDefault()
         try {
-            const response = await login(userName, password);
+            const response = await login(phone, password);
             console.log(response);
             
         } catch (error) {
@@ -53,9 +53,9 @@ const LoginModule = () => {
                             <div className="col-12 mt-2">
                                 <input
                                     type="text"
-                                    onChange={handleChangeUserName}
+                                    onChange={handleChangePhone}
                                     className="form-control test-1-fpn"
-                                    placeholder="Имя пользователя"
+                                    placeholder="Телефон"
                                     required
                                 />
                                 <div className="invalid-feedback test-1-emph">Сообщение об ошибке</div>

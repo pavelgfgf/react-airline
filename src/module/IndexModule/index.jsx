@@ -12,7 +12,7 @@ const IndexModule = () => {
     }
 
     const handleChangeSearchFrom = (e) => {
-        searchParams.set('fromi', e.target.value)
+        searchParams.set('from', e.target.value)
     }
 
     const handleChangeSearchTo = (e) => {
@@ -20,9 +20,15 @@ const IndexModule = () => {
     }
 
     const handleChangeDate = (e) => {
-        searchParams.set('date', e.target.value)
+        searchParams.set('date1', e.target.value)
     }
 
+    const handleChangePassengers = (e) => {
+        searchParams.set('passengers', e.target.value)
+    }
+
+    console.log(handleChangePassengers);
+    
     return (
         <>
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -86,7 +92,7 @@ const IndexModule = () => {
                                 <div className="invalid-feedback">Сообщение об ошибке</div>
                             </div>
                             <div className="col-12 col-sm-6 col-lg-2 mt-3 col-xl-1 mt-lg-0 pr-xl-0">
-                                <select className="form-control test-0-fnp" id="kol">
+                                <select className="form-control test-0-fnp" id="kol" onChange={handleChangePassengers}>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
