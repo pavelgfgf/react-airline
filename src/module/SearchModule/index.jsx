@@ -17,8 +17,6 @@ const SearchModule = () => {
         deleteSelectedFlightBack
     } = useContext(FlightsContext);
 
-    console.log(selectedFlights);
-
     useEffect(() => {
         if (params) {
             const passengers = params.get('passengers');
