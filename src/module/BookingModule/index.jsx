@@ -1,27 +1,33 @@
-import { useEffect, useState } from "react";
-import { getFlight } from "../../api/airports/airports";
+import { useContext, useEffect, useState } from "react";
 import { booking } from "../../api/booking/booking";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import { FlightsContext } from '../../Context';
+import { Link } from "react-router";
 
-const initPassenger = {
-    'id': crypto.randomUUID(),
-    'firstName': '',
-    'lastName': '',
-    "document_number": ''
-}
 const BookingModule = () => {
-    const [flight, setFlight] = useState('')
-    const [passengers, setPassenger] = useState([initPassenger])
-    const navigate = useNavigate()
+    const { passengerCount, selectedFlights } = useContext(FlightsContext);
+    const [passengers, setPassengers] = useState([]);
+    const navigate = useNavigate();
+    const { state } = useLocation();
+
+    const { selectedFlightFrom, selectedFlightBack } = selectedFlights
 
     useEffect(() => {
-        getFlight().then((data) => setFlight(data))
-    }, [])
+        const initPassengers = Array.from({ length: passengerCount}, () => ({
+            id: crypto.randomUUID(),
+            firstName: '',
+            lastName: '',
+            documentNumber: '',
+            birthDate: '',
+        }));
+        setPassengers(initPassengers);
+    }, []);
 
     const onChangeValue = (e, passangerId, key) => {
-        setPassenger((prev) => {
+        setPassengers((prev) => {
             return prev.map((passenger) => {
                 if (passenger.id === passangerId) {
+
                     return { ...passenger, [key]: e.target.value }
                 }
                 return { ...passenger };
@@ -29,31 +35,35 @@ const BookingModule = () => {
         })
     }
 
-    const addPassanger = () => {
-        setPassenger((prev) => [...prev, {
-            'id': crypto.randomUUID(),
-            'firstName': '',
-            'lastName': '',
-            "document_number": ''
-        }])
-    }
+    // const addPassenger = () => {
+    //     setPassenger((prev) => [...prev, {
+    //         'id': crypto.randomUUID(),
+    //         'firstName': '',
+    //         'lastName': '',
+    //         "document_number": ''
+    //     }])
+    // }
 
-    const deletePassenger = (passangerId) => {
-        setPassenger((prev) => prev.filter(({ id }) => passangerId !== id))
-    }
+    // const deletePassenger = (passangerId) => {
+    //     setPassenger((prev) => prev.filter(({ id }) => passangerId !== id))
+    // }
+
+    console.log(selectedFlights);
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            const response = await booking(passengers)
-            console.log(response);
+            const flightFrom = selectedFlights.selectedFlightFrom;
+            const flightBack = selectedFlights.selectedFlightBack;
+
+            const response = await booking(passengers, flightFrom, flightBack)
+            navigate(`/booking/${response.data.code}`)
 
         } catch (error) {
             console.log(error);
 
         }
-        navigate('/booking-management')
     }
-    console.log(passengers);
 
     return (
         <>
@@ -64,7 +74,9 @@ const BookingModule = () => {
                         <h2 className="mb-4">
                             Бронирование
                         </h2>
-                        <a href="/search" className="btn btn-sm btn-secondary test-5-bgoback">Назад</a>
+                        <Link to={`/search?${state.searchParams}`} className="btn btn-sm btn-secondary test-5-bgoback">
+                            Назад
+                        </Link>
                     </div>
 
                     <div className="d-flex justify-content-between align-items-baseline mb-4">
@@ -82,13 +94,24 @@ const BookingModule = () => {
                             </tr>
                         </thead>
                         <tbody className="table-success">
-                            <tr>
-                                <td>{flight.flight}</td>
-                                <td>{flight.fromi?.city}, {flight.fromi?.iata}</td>
-                                <td>{flight.fromi?.date}, {flight.fromi?.time}</td>
-                                <td>{flight.to?.city}, {flight.to?.iata}</td>
-                                <td>{flight.cost}</td>
-                            </tr>
+                            {selectedFlightFrom && (
+                                <tr key={selectedFlightFrom.id}>
+                                    <td>{selectedFlightFrom.flightCode}</td>
+                                    <td>{selectedFlightFrom.from?.city}, {selectedFlightFrom.from?.iata}</td>
+                                    <td>{selectedFlightFrom.from?.date}, {selectedFlightFrom.from?.time}</td>
+                                    <td>{selectedFlightFrom.to?.city}, {selectedFlightFrom.to?.iata}</td>
+                                    <td>{selectedFlightFrom.cost}</td>
+                                </tr>
+                                )}
+                            {selectedFlightBack && (
+                                <tr key={selectedFlightBack.id}>
+                                    <td>{selectedFlightBack.flightCode}</td>
+                                    <td>{selectedFlightBack.from?.city}, {selectedFlightBack.from?.iata}</td>
+                                    <td>{selectedFlightBack.from?.date}, {selectedFlightBack.from?.time}</td>
+                                    <td>{selectedFlightBack.to?.city}, {selectedFlightBack.to?.iata}</td>
+                                    <td>{selectedFlightBack.cost}</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </section>
@@ -96,12 +119,13 @@ const BookingModule = () => {
                 <section className="mt-5">
                     <div className="d-flex justify-content-between align-items-baseline mb-4">
                         <h4>Пассажиры</h4>
-                        <button className="btn btn-primary btn-sm test-5-add" onClick={() => addPassanger()}>Добавить пассажира</button>
+                        {/* {passengers.length < 8 && <button className="btn btn-primary btn-sm test-5-add" onClick={() => addPassenger()}>Добавить пассажира</button>} */}
                     </div>
 
                         {passengers?.map((passenger) => {
                             return (
-                                <div className="row" key={passenger.id}>
+                                <div className="row" key={passenger.id} style={{ paddingBottom: 20 }}>
+                                     <hr />
                                     <div className="col-12 col-sm-6 col-lg-4 col-xl-3 pr-lg-0 mb-4">
                                         <input
                                             type="text"
@@ -123,7 +147,7 @@ const BookingModule = () => {
                                             type="text"
                                             className="form-control test-5-dob"
                                             placeholder="Дата рождения"
-                                            onChange={(e) => onChangeValue(e, passenger.id, 'dataBirth')}
+                                            onChange={(e) => onChangeValue(e, passenger.id, 'birthDate')}
                                         />
                                     </div>
                                     <div className="col-12 col-sm-6 col-lg-2 mt-3 col-xl-2 mt-lg-0 pr-xl-0">
@@ -134,14 +158,14 @@ const BookingModule = () => {
                                             onChange={(e) => onChangeValue(e, passenger.id, 'documentNumber')}
                                         />
                                     </div>
-                                    <div className="col-12 col-xl-2 mt-3 mt-xl-0">
+                                    {/* <div className="col-12 col-xl-2 mt-3 mt-xl-0">
                                         <button className="btn btn-danger btn-sm form-control test-5-bremove mb-4" type="button" onClick={() => deletePassenger(passenger.id)}>Удалить</button>
-                                    </div>
+                                    </div> */}
                                 </div>
                             )
                         })}
 
-                        <button className="btn btn-success mt-4 form-control test-5-book" onClick={handleSubmit} > Подтвердить </button>
+                        <button className="btn btn-success mt-4 form-control test-5-book" onClick={handleSubmit}> Подтвердить </button>
                 </section>
 
             </div>

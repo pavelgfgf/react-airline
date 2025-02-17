@@ -1,78 +1,72 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
-import { getFlights } from "../../api/airports/airports";
+import { useEffect, useState, useContext } from "react";
+import { Link, useSearchParams } from "react-router";
+import { getFlights } from "../../api/flight/flight";
+import Flight from "./components/Flight";
+import { FlightsContext } from "../../Context";
 
 
 const SearchModule = () => {
     const [params] = useSearchParams()
-    const [items, setItems] = useState([])
+    const [items, setItems] = useState({})
+    const {
+        setPassengerCount,
+        selectedFlights,
+        addSelectedFlightFrom,
+        deleteSelectedFlightFrom,
+        addSelectedFlightBack,
+        deleteSelectedFlightBack
+    } = useContext(FlightsContext);
+
+    console.log(selectedFlights);
 
     useEffect(() => {
         if (params) {
             const searchFrom = params.get('from');
             const searchTo = params.get('to');
             const date1 = params.get('date1');
-            const passengers = params.get('passengers')
-            getFlights(searchFrom, searchTo, date1, passengers).then((response) => {
-                setItems(response.data.flightTo)
-
-                console.log(response);
+            const date2 = params.get('date2');
+            const passengers = params.get('passengers');
+            getFlights(searchFrom, searchTo, date1, date2, passengers || 1).then((response) => {
+                setItems(response.data);
+                setPassengerCount(passengers || 1);
             })
-
-
-
         }
     }, [params])
-
 
     return (
         <div className="container">
             <section className="mt-5">
-                <form action="GET">
-                    <div className="d-flex justify-content-between align-items-start">
-                        <h2 className="mb-4">Из {params.get("from")} в {params.get("to")}.</h2>
-                        <a href="/" className="btn btn-sm btn-secondary test-4-bback">Назад</a>
-                    </div>
+                <div className="d-flex justify-content-between align-items-start">
+                    <h2 className="mb-4">Из {params.get("from")} в {params.get("to")}.</h2>
+                </div>
+                {items?.flightsTo?.map((item) => (
+                    <Flight 
+                        flightData={item} 
+                        key={item.id} 
+                        onAddFlight={(flight) => addSelectedFlightFrom(flight)}
+                        onDeleteFlight={() => deleteSelectedFlightFrom()}
+                        isSelected={selectedFlights.selectedFlightFrom?.id === item.id}
+                    />
+                ))}
+                <hr />
+                {items?.flightsBack?.map((item) => (
+                    <Flight
+                        flightData={item}
+                        key={item.id}
+                        onAddFlight={(flight) => addSelectedFlightBack(flight)}
+                        onDeleteFlight={() => deleteSelectedFlightBack()}
+                        isSelected={selectedFlights.selectedFlightBack?.id === item.id}
+                    />
+                ))}
 
-                    {items.length > 0 ? (
-                        items.map((item, i) => (
-                            <div key={item.id || i} className="mb-4">
-                                <h5 className="mt-4 mb-3">
-                                    <span className="test-4-fif1" id="city1">{item.from.city}</span>
-                                    <span className="ms-3 me-3">&#10095;</span>
-                                    <span className="test-4-fit1" id="city2">{item.to.city}</span>
-                                </h5>
-
-                                <table className="table table-bordered tablefrom">
-                                    <thead>
-                                        <tr>
-                                            <th>Номер рейса</th>
-                                            <th>Самолет</th>
-                                            <th>Дата и время отправления</th>
-                                            <th>Время полета</th>
-                                            <th>Время прибытия</th>
-                                            <th>Стоимость</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{item.flightCode}</td>
-                                            <td>Airbus A320</td>
-                                            <td>{item.from.date}, {item.from.time}</td>
-                                            <td>1 час 10 минут</td>
-                                            <td>{item.to.date}, {item.to.time}</td>
-                                            <td>{item.cost} ₽</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        ))
-                    ) : (
-                        <p>Рейсы не найдены</p>
-                    )}
-                </form>
-
-                <a href="/booking" className="btn btn-primary test-4-bgobook mt-4">Перейти к бронированию</a>
+                {selectedFlights?.selectedFlightFrom ? (
+                        <Link to="/booking" state={{ searchParams: params.toString() }}>
+                            <button className="btn btn-primary test-4-bgobook mt-4">
+                                Перейти к бронированию
+                            </button>
+                        </Link>
+                    ) : null
+                }
             </section>
         </div>
     );
