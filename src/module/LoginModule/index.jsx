@@ -34,8 +34,7 @@ const LoginModule = () => {
     const hadleSubmit = async (event) => {
         event.preventDefault()
         try {
-            const response = await login(phone, password);
-            console.log(response);
+            await login(phone, password);
             
         } catch (error) {
             console.error(error);

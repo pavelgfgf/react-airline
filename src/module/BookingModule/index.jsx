@@ -21,7 +21,7 @@ const BookingModule = () => {
             birthDate: '',
         }));
         setPassengers(initPassengers);
-    }, []);
+    }, [passengerCount]);
 
     const onChangeValue = (e, passangerId, key) => {
         setPassengers((prev) => {
@@ -48,7 +48,6 @@ const BookingModule = () => {
     //     setPassenger((prev) => prev.filter(({ id }) => passangerId !== id))
     // }
 
-    console.log(selectedFlights);
 
     const handleSubmit = async (e) => {
         e.preventDefault()

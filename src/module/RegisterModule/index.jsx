@@ -48,8 +48,7 @@ const RegisterModule = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            const data = await register(firstName, lastName, documentNumber, phone, password)
-            console.log(data);
+            await register(firstName, lastName, documentNumber, phone, password)
         } catch (error) {
             console.error(error);
         }
