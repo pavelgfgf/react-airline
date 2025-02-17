@@ -21,12 +21,8 @@ const SearchModule = () => {
 
     useEffect(() => {
         if (params) {
-            const searchFrom = params.get('from');
-            const searchTo = params.get('to');
-            const date1 = params.get('date1');
-            const date2 = params.get('date2');
             const passengers = params.get('passengers');
-            getFlights(searchFrom, searchTo, date1, date2, passengers || 1).then((response) => {
+            getFlights(params.toString()).then((response) => {
                 setItems(response.data);
                 setPassengerCount(passengers || 1);
             })
