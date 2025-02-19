@@ -4,6 +4,4 @@ const RegisterPage = () => {
     return <RegisterModule />
 }
 
-export default RegisterPage
-
-
+export default RegisterPage;
