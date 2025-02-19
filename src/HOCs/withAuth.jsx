@@ -1,15 +1,15 @@
 import { Navigate } from "react-router";
 
 const withAuth = (WrappedComponent) => {
-    const isAuthenticated = localStorage.getItem('token');
-
     // eslint-disable-next-line react/display-name
     return (props) => {
-        if (isAuthenticated) {
-            return <WrappedComponent {...props} />;
+       const isAuthenticated = !!localStorage.getItem('token');
+
+        if (!isAuthenticated) {
+            return <Navigate to={"/login"} />
         }
 
-        return <Navigate to={"/login"} />
+       return <WrappedComponent {...props} />;
     }
 }
 
